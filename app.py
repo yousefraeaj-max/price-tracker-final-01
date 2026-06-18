@@ -30,7 +30,7 @@ if app.config['TELEGRAM_BOT_TOKEN']:
     telegram_bot = TelegramBot(
         app,
         app.config['TELEGRAM_BOT_TOKEN'],
-        app.config.get('TELEGRAM_WEBHOOK_URL', request.host_url.rstrip('/'))
+        app.config.get('TELEGRAM_WEBHOOK_URL', '')
     )
 
 # Initialize scheduler for price checking
