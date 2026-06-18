@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}الإحصائيات - PriceTracker{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div class="section-title" style="margin-bottom: 0;">
+            <i class="fas fa-chart-bar"></i>
+            الإحصائيات والتقارير
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+        </a>
+    </div>
+    
+    {% if stats %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>المنتج</th>
+                <th>السعر الحالي</th>
+                <th>التغيير</th>
+                <th>أقل سعر</th>
+                <th>أعلى سعر</th>
+                <th>متوسط السعر</th>
+                <th>عدد الفحوصات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in stats %}
+            <tr>
+                <td>{{ item.link.name[:40] }}{% if item.link.name|length > 40 %}...{% endif %}</td>
+                <td style="font-weight: 600;">{{ "%.2f"|format(item.current_price) }} ج.م</td>
+                <td>
+                    {% if item.change_percent > 0 %}
+                    <span style="color: #f44336; font-weight: 600;">
+                        <i class="fas fa-arrow-up"></i> {{ "%.1f"|format(item.change_percent) }}%
+                    </span>
+                    {% elif item.change_percent < 0 %}
+                    <span style="color: #4caf50; font-weight: 600;">
+                        <i class="fas fa-arrow-down"></i> {{ "%.1f"|format(item.change_percent) }}%
+                    </span>
+                    {% else %}
+                    <span style="color: #999;">لا تغيير</span>
+                    {% endif %}
+                </td>
+                <td style="color: #4caf50; font-weight: 600;">{{ "%.2f"|format(item.min_price) }} ج.م</td>
+                <td style="color: #f44336; font-weight: 600;">{{ "%.2f"|format(item.max_price) }} ج.م</td>
+                <td>{{ "%.2f"|format(item.avg_price) }} ج.م</td>
+                <td>{{ item.history_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div style="padding: 20px; background: rgba(76, 175, 80, 0.1); border-radius: 15px; text-align: center;">
+            <i class="fas fa-arrow-down" style="font-size: 40px; color: #4caf50; margin-bottom: 15px;"></i>
+            <h4 style="color: #4caf50; margin-bottom: 10px;">أكبر انخفاض</h4>
+            {% set max_drop = stats|sort(attribute='change_percent')|first %}
+            {% if max_drop and max_drop.change_percent < 0 %}
+            <p style="font-size: 24px; font-weight: 800; color: #333;">{{ "%.1f"|format(max_drop.change_percent) }}%</p>
+            <p style="color: #666; font-size: 14px;">{{ max_drop.link.name[:30] }}</p>
+            {% else %}
+            <p style="color: #666;">لا يوجد انخفاض</p>
+            {% endif %}
+        </div>
+        
+        <div style="padding: 20px; background: rgba(244, 67, 54, 0.1); border-radius: 15px; text-align: center;">
+            <i class="fas fa-arrow-up" style="font-size: 40px; color: #f44336; margin-bottom: 15px;"></i>
+            <h4 style="color: #f44336; margin-bottom: 10px;">أكبر ارتفاع</h4>
+            {% set max_rise = stats|sort(attribute='change_percent', reverse=true)|first %}
+            {% if max_rise and max_rise.change_percent > 0 %}
+            <p style="font-size: 24px; font-weight: 800; color: #333;">{{ "%.1f"|format(max_rise.change_percent) }}%</p>
+            <p style="color: #666; font-size: 14px;">{{ max_rise.link.name[:30] }}</p>
+            {% else %}
+            <p style="color: #666;">لا يوجد ارتفاع</p>
+            {% endif %}
+        </div>
+        
+        <div style="padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 15px; text-align: center;">
+            <i class="fas fa-chart-line" style="font-size: 40px; color: #667eea; margin-bottom: 15px;"></i>
+            <h4 style="color: #667eea; margin-bottom: 10px;">إجمالي الفحوصات</h4>
+            <p style="font-size: 24px; font-weight: 800; color: #333;">{{ stats|sum(attribute='history_count') }}</p>
+            <p style="color: #666; font-size: 14px;">على {{ stats|length }} منتج</p>
+        </div>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 40px;">
+        <i class="fas fa-inbox" style="font-size: 50px; margin-bottom: 15px;"></i>
+        <br>
+        لا توجد بيانات كافية للإحصائيات. يجب أن يكون هناك على الأقل فحصين لكل منتج.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}تفعيل الحساب - PriceTracker{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 50px auto; text-align: center;">
+    <i class="fas fa-clock" style="font-size: 80px; color: #f39c12; margin-bottom: 30px;"></i>
+    
+    <h1 style="color: #667eea; margin-bottom: 20px;">حسابك معلق</h1>
+    
+    <p style="color: #666; font-size: 18px; margin-bottom: 30px;">
+        يرجى تفعيل حسابك عبر تليجرام للوصول إلى جميع المميزات
+    </p>
+    
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+        <h3 style="margin-bottom: 15px;"><i class="fab fa-telegram"></i> خطوات التفعيل:</h3>
+        <ol style="text-align: right; margin-right: 20px; line-height: 2;">
+            <li>اضغط على زر التفعيل بالأسفل</li>
+            <li>افتح بوت تليجرام</li>
+            <li>اضغط على Start</li>
+            <li>شارك رقم هاتفك</li>
+            <li>عد إلى الموقع وسيتم تفعيل حسابك تلقائياً</li>
+        </ol>
+    </div>
+    
+    <a href="https://t.me/PriceTrackerBot?start={{ user.activation_token }}" target="_blank" class="btn btn-primary" style="font-size: 18px; padding: 15px 40px;">
+        <i class="fab fa-telegram"></i> تفعيل الحساب عبر تليجرام
+    </a>
+    
+    <div style="margin-top: 30px; padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 10px;">
+        <p style="color: #666; font-size: 14px;">
+            <i class="fas fa-info-circle"></i> 
+            سيتم فتح هذه الصفحة تلقائياً بعد التفعيل. إذا لم يتم، قم بتحديث الصفحة.
+        </p>
+    </div>
+    
+    <script>
+        // Poll for activation status
+        function checkActivation() {
+            fetch('/check-activation/{{ user.activation_token }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.activated) {
+                        window.location.href = '/dashboard';
+                    }
+                });
+        }
+        
+        // Check every 3 seconds
+        setInterval(checkActivation, 3000);
+    </script>
+</div>
+{% endblock %}

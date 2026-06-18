@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}تاريخ الأسعار - PriceTracker{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div class="section-title" style="margin-bottom: 0;">
+            <i class="fas fa-history"></i>
+            تاريخ الأسعار
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+        </a>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px;">
+        <h3 style="margin-bottom: 10px;">{{ link.name }}</h3>
+        <p style="opacity: 0.9; margin-bottom: 5px;">
+            <i class="fas fa-link"></i> {{ link.url }}
+        </p>
+        <p style="opacity: 0.9;">
+            <i class="fas fa-tag"></i> النوع: 
+            {% if link.link_type == 'my_store' %}
+            منتج متجري
+            {% else %}
+            مراقبة منافس
+            {% endif %}
+        </p>
+    </div>
+    
+    {% if history %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <div style="padding: 20px; background: rgba(76, 175, 80, 0.1); border-radius: 15px; text-align: center;">
+            <i class="fas fa-arrow-down" style="font-size: 30px; color: #4caf50; margin-bottom: 10px;"></i>
+            <h4 style="color: #4caf50; margin-bottom: 5px;">أقل سعر</h4>
+            <p style="font-size: 24px; font-weight: 800; color: #333;">{{ "%.2f"|format(min_price) }} ج.م</p>
+        </div>
+        
+        <div style="padding: 20px; background: rgba(244, 67, 54, 0.1); border-radius: 15px; text-align: center;">
+            <i class="fas fa-arrow-up" style="font-size: 30px; color: #f44336; margin-bottom: 10px;"></i>
+            <h4 style="color: #f44336; margin-bottom: 5px;">أعلى سعر</h4>
+            <p style="font-size: 24px; font-weight: 800; color: #333;">{{ "%.2f"|format(max_price) }} ج.م</p>
+        </div>
+        
+        <div style="padding: 20px; background: rgba(102, 126, 234, 0.1); border-radius: 15px; text-align: center;">
+            <i class="fas fa-chart-line" style="font-size: 30px; color: #667eea; margin-bottom: 10px;"></i>
+            <h4 style="color: #667eea; margin-bottom: 5px;">متوسط السعر</h4>
+            <p style="font-size: 24px; font-weight: 800; color: #333;">{{ "%.2f"|format(avg_price) }} ج.م</p>
+        </div>
+        
+        <div style="padding: 20px; background: rgba(255, 193, 7, 0.1); border-radius: 15px; text-align: center;">
+            <i class="fas fa-tag" style="font-size: 30px; color: #ffc107; margin-bottom: 10px;"></i>
+            <h4 style="color: #ffc107; margin-bottom: 5px;">السعر الحالي</h4>
+            <p style="font-size: 24px; font-weight: 800; color: #333;">{{ "%.2f"|format(current_price) }} ج.م</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if history %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>السعر</th>
+                <th>العملة</th>
+                <th>تاريخ الفحص</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in history %}
+            <tr>
+                <td style="font-weight: 600; color: #4caf50; font-size: 18px;">{{ "%.2f"|format(record.price) }} ج.م</td>
+                <td>{{ record.currency }}</td>
+                <td>{{ record.checked_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 40px;">
+        <i class="fas fa-inbox" style="font-size: 50px; margin-bottom: 15px;"></i>
+        <br>
+        لا يوجد سجل أسعار بعد. سيظهر السجل هنا بعد أول فحص للسعر.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

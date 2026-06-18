@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}مقارنة الأسعار - PriceTracker{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div class="section-title" style="margin-bottom: 0;">
+            <i class="fas fa-balance-scale"></i>
+            مقارنة الأسعار
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+        </a>
+    </div>
+    
+    <p style="color: #666; margin-bottom: 20px;">
+        مقارنة أحدث الأسعار لجميع الروابط النشطة
+    </p>
+    
+    {% if comparison_data %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>المنتج</th>
+                <th>النوع</th>
+                <th>السعر</th>
+                <th>آخر فحص</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in comparison_data %}
+            <tr>
+                <td style="font-weight: 600;">{{ loop.index }}</td>
+                <td>{{ item.link.name[:50] }}{% if item.link.name|length > 50 %}...{% endif %}</td>
+                <td>
+                    {% if item.link.link_type == 'my_store' %}
+                    <span class="badge badge-success">منتج متجري</span>
+                    {% else %}
+                    <span class="badge badge-danger">منافس</span>
+                    {% endif %}
+                </td>
+                <td style="font-weight: 600; color: #4caf50; font-size: 18px;">{{ "%.2f"|format(item.price) }} ج.م</td>
+                <td>{{ item.checked_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px;">
+        <h4 style="margin-bottom: 15px;"><i class="fas fa-chart-line"></i> ملخص المقارنة</h4>
+        <p style="margin-bottom: 8px;">
+            <strong>أقل سعر:</strong> {{ "%.2f"|format(comparison_data[0].price) }} ج.م - {{ comparison_data[0].link.name[:30] }}
+        </p>
+        <p style="margin-bottom: 8px;">
+            <strong>أعلى سعر:</strong> {{ "%.2f"|format(comparison_data[-1].price) }} ج.م - {{ comparison_data[-1].link.name[:30] }}
+        </p>
+        <p>
+            <strong>متوسط الأسعار:</strong> {{ "%.2f"|format(item.price for item in comparison_data | sum / comparison_data|length) }} ج.م
+        </p>
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 40px;">
+        <i class="fas fa-inbox" style="font-size: 50px; margin-bottom: 15px;"></i>
+        <br>
+        لا توجد روابط نشطة للمقارنة. أضف روابط وفعّلها أولاً.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

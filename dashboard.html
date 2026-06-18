@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم - PriceTracker{% endblock %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div class="card" style="text-align: center; padding: 25px;">
+        <i class="fas fa-store" style="font-size: 40px; color: #667eea; margin-bottom: 15px;"></i>
+        <h3 style="color: #667eea; margin-bottom: 10px;">منتجات متجري</h3>
+        <p style="font-size: 36px; font-weight: 800; color: #333;">{{ my_store_links|length }}</p>
+    </div>
+    
+    <div class="card" style="text-align: center; padding: 25px;">
+        <i class="fas fa-eye" style="font-size: 40px; color: #764ba2; margin-bottom: 15px;"></i>
+        <h3 style="color: #764ba2; margin-bottom: 10px;">مراقبة المنافسين</h3>
+        <p style="font-size: 36px; font-weight: 800; color: #333;">{{ competitor_links|length }}</p>
+    </div>
+    
+    <div class="card" style="text-align: center; padding: 25px;">
+        <i class="fas fa-link" style="font-size: 40px; color: #4facfe; margin-bottom: 15px;"></i>
+        <h3 style="color: #4facfe; margin-bottom: 10px;">إجمالي الروابط</h3>
+        <p style="font-size: 36px; font-weight: 800; color: #333;">{{ total_links }}</p>
+    </div>
+    
+    <div class="card" style="text-align: center; padding: 25px;">
+        <i class="fas fa-bolt" style="font-size: 40px; color: #4caf50; margin-bottom: 15px;"></i>
+        <h3 style="color: #4caf50; margin-bottom: 10px;">روابط نشطة</h3>
+        <p style="font-size: 36px; font-weight: 800; color: #333;">{{ active_links }}</p>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+    <a href="{{ url_for('compare') }}" class="btn btn-primary" style="text-align: center; padding: 20px;">
+        <i class="fas fa-balance-scale"></i> مقارنة الأسعار
+    </a>
+    <a href="{{ url_for('statistics') }}" class="btn btn-success" style="text-align: center; padding: 20px;">
+        <i class="fas fa-chart-bar"></i> الإحصائيات
+    </a>
+    <a href="{{ url_for('settings') }}" class="btn btn-warning" style="text-align: center; padding: 20px;">
+        <i class="fas fa-cog"></i> الإعدادات
+    </a>
+</div>
+
+<!-- Recent Changes -->
+{% if recent_changes %}
+<div class="card">
+    <div class="section-title">
+        <i class="fas fa-history"></i>
+        أحدث التغييرات
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>المنتج</th>
+                <th>السعر</th>
+                <th>التاريخ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for change in recent_changes %}
+            <tr>
+                <td>{{ change.link.name[:50] }}{% if change.link.name|length > 50 %}...{% endif %}</td>
+                <td style="font-weight: 600; color: #4caf50;">{{ "%.2f"|format(change.price) }} ج.م</td>
+                <td>{{ change.checked_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- My Store Products Section -->
+<div class="card">
+    <div class="section-title">
+        <i class="fas fa-store"></i>
+        منتجات متجري
+    </div>
+    
+    <form method="POST" action="{{ url_for('add_link') }}" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+        <input type="text" name="url" class="form-control" placeholder="رابط المنتج" required style="flex: 2; min-width: 200px;">
+        <input type="text" name="name" class="form-control" placeholder="اسم المنتج (اختياري)" style="flex: 1; min-width: 150px;">
+        <input type="hidden" name="link_type" value="my_store">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة
+        </button>
+    </form>
+    
+    {% if my_store_links %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الرابط</th>
+                <th>آخر سعر</th>
+                <th>آخر فحص</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for link in my_store_links %}
+            <tr>
+                <td>{{ link.name[:50] }}{% if link.name|length > 50 %}...{% endif %}</td>
+                <td><a href="{{ link.url }}" target="_blank" style="color: #667eea;">{{ link.url[:40] }}...</a></td>
+                <td>
+                    {% if link.last_price %}
+                    <span style="font-weight: 600; color: #4caf50;">{{ "%.2f"|format(link.last_price) }} ج.م</span>
+                    {% else %}
+                    <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if link.last_checked %}
+                    {{ link.last_checked.strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                    <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if link.is_active %}
+                    <span class="badge badge-success">نشط</span>
+                    {% else %}
+                    <span class="badge badge-danger">موقف</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('toggle_link', link_id=link.id) }}" class="btn btn-warning" style="padding: 5px 10px; font-size: 14px;">
+                        <i class="fas fa-power-off"></i>
+                    </a>
+                    <a href="{{ url_for('link_history', link_id=link.id) }}" class="btn btn-success" style="padding: 5px 10px; font-size: 14px;">
+                        <i class="fas fa-history"></i>
+                    </a>
+                    <a href="{{ url_for('delete_link', link_id=link.id) }}" class="btn btn-danger" style="padding: 5px 10px; font-size: 14px;">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 40px;">
+        <i class="fas fa-inbox" style="font-size: 50px; margin-bottom: 15px;"></i>
+        <br>
+        لا توجد منتجات بعد. أضف رابط منتجك للبدء.
+    </p>
+    {% endif %}
+</div>
+
+<!-- Competitor Monitoring Section -->
+<div class="card">
+    <div class="section-title">
+        <i class="fas fa-eye"></i>
+        مراقبة المنافسين
+    </div>
+    
+    <form method="POST" action="{{ url_for('add_link') }}" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+        <input type="text" name="url" class="form-control" placeholder="رابط منتج المنافس" required style="flex: 2; min-width: 200px;">
+        <input type="text" name="name" class="form-control" placeholder="اسم المنتج (اختياري)" style="flex: 1; min-width: 150px;">
+        <input type="hidden" name="link_type" value="competitor">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة
+        </button>
+    </form>
+    
+    {% if competitor_links %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الرابط</th>
+                <th>آخر سعر</th>
+                <th>آخر فحص</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for link in competitor_links %}
+            <tr>
+                <td>{{ link.name[:50] }}{% if link.name|length > 50 %}...{% endif %}</td>
+                <td><a href="{{ link.url }}" target="_blank" style="color: #667eea;">{{ link.url[:40] }}...</a></td>
+                <td>
+                    {% if link.last_price %}
+                    <span style="font-weight: 600; color: #4caf50;">{{ "%.2f"|format(link.last_price) }} ج.م</span>
+                    {% else %}
+                    <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if link.last_checked %}
+                    {{ link.last_checked.strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                    <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if link.is_active %}
+                    <span class="badge badge-success">نشط</span>
+                    {% else %}
+                    <span class="badge badge-danger">موقف</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('toggle_link', link_id=link.id) }}" class="btn btn-warning" style="padding: 5px 10px; font-size: 14px;">
+                        <i class="fas fa-power-off"></i>
+                    </a>
+                    <a href="{{ url_for('link_history', link_id=link.id) }}" class="btn btn-success" style="padding: 5px 10px; font-size: 14px;">
+                        <i class="fas fa-history"></i>
+                    </a>
+                    <a href="{{ url_for('delete_link', link_id=link.id) }}" class="btn btn-danger" style="padding: 5px 10px; font-size: 14px;">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 40px;">
+        <i class="fas fa-inbox" style="font-size: 50px; margin-bottom: 15px;"></i>
+        <br>
+        لا توجد روابط مراقبة بعد. أضف رابط منافس للبدء.
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}تسجيل الدخول - PriceTracker{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 450px; margin: 50px auto;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <i class="fas fa-chart-line" style="font-size: 60px; color: #667eea;"></i>
+        <h1 style="margin-top: 20px; color: #667eea;">PriceTracker</h1>
+        <p style="color: #666; margin-top: 10px;">تتبع أسعار منتجاتك بسهولة</p>
+    </div>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label><i class="fas fa-envelope"></i> البريد الإلكتروني أو رقم الهاتف</label>
+            <input type="text" name="email_or_phone" class="form-control" required placeholder="أدخل البريد الإلكتروني أو رقم الهاتف">
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-lock"></i> كلمة المرور</label>
+            <input type="password" name="password" class="form-control" required placeholder="أدخل كلمة المرور">
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+        </button>
+    </form>
+    
+    <p style="text-align: center; margin-top: 20px; color: #666;">
+        ليس لديك حساب؟ 
+        <a href="{{ url_for('register') }}" style="color: #667eea; font-weight: 600;">إنشاء حساب جديد</a>
+    </p>
+</div>
+{% endblock %}
