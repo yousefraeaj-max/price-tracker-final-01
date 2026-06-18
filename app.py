@@ -45,6 +45,13 @@ def load_user(user_id):
 
 # Create database tables
 with app.app_context():
+    # Ensure data directory exists for persistent storage
+    db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
+    if db_path.startswith('/'):
+        import os
+        db_dir = os.path.dirname(db_path)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
     db.create_all()
 
 # Routes
@@ -348,18 +355,8 @@ def check_activation(token):
 
 @app.route('/telegram/webhook', methods=['POST'])
 def telegram_webhook():
-    """Handle Telegram webhook"""
-    if telegram_bot:
-        # Process the update
-        from telegram import Update
-        from telegram.ext import Application
-        import json
-        
-        update = Update.de_json(request.get_json(force=True), telegram_bot.application.bot)
-        telegram_bot.application.update_queue.put(update)
-        
-        return jsonify({'status': 'ok'})
-    return jsonify({'status': 'error'}), 400
+    """Handle Telegram webhook - not used in simplified version"""
+    return jsonify({'status': 'ok'})
 
 # Price checking function
 def check_prices():
@@ -425,8 +422,8 @@ def start_scheduler():
 
 # Set webhook on startup
 def set_telegram_webhook():
-    if telegram_bot and app.config['TELEGRAM_WEBHOOK_URL']:
-        telegram_bot.set_webhook()
+    # Webhook not used in simplified version
+    pass
 
 if __name__ == '__main__':
     # Start scheduler in a separate thread
